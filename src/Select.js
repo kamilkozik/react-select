@@ -49,6 +49,7 @@ const Select = React.createClass({
 		escapeClearsValue: React.PropTypes.bool,    // whether escape clears the value when the menu is closed
 		filterOption: React.PropTypes.func,         // method to filter a single option (option, filterString)
 		filterOptions: React.PropTypes.any,         // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
+    focusFirstOption: React.PropTypes.bool,     // if first option should be focused after menu open
 		ignoreAccents: React.PropTypes.bool,        // whether to strip diacritics when filtering
 		ignoreCase: React.PropTypes.bool,           // whether to perform case-insensitive filtering
 		inputProps: React.PropTypes.object,         // custom attributes for the Input
@@ -87,6 +88,7 @@ const Select = React.createClass({
 		resetValue: React.PropTypes.any,            // value to use when you clear the control
 		scrollMenuIntoView: React.PropTypes.bool,   // boolean to enable the viewport to shift so that the full menu fully visible when engaged
 		searchable: React.PropTypes.bool,           // whether to enable searching feature or not
+		selectResetsInput: React.PropTypes.bool,    // whether input is cleared after selection is made
 		simpleValue: React.PropTypes.bool,          // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
 		style: React.PropTypes.object,              // optional style to apply to the control
 		tabIndex: React.PropTypes.string,           // optional tab index of the control
@@ -114,6 +116,7 @@ const Select = React.createClass({
 			disabled: false,
 			escapeClearsValue: true,
 			filterOptions: true,
+      focusFirstOption: true,
 			ignoreAccents: true,
 			ignoreCase: true,
 			inputProps: {},
@@ -134,6 +137,7 @@ const Select = React.createClass({
 			resetValue: null,
 			scrollMenuIntoView: true,
 			searchable: true,
+			selectResetsInput: true,
 			simpleValue: false,
 			tabSelectsValue: true,
 			valueComponent: Value,
@@ -539,7 +543,7 @@ const Select = React.createClass({
 		this.hasScrolledToOption = false;
 		if (this.props.multi) {
 			this.setState({
-				inputValue: '',
+				inputValue: this.props.selectResetsInput ? '' : this.state.inputValue.slice(),
 				focusedIndex: null
 			}, () => {
 				this.addValue(value);
@@ -547,7 +551,7 @@ const Select = React.createClass({
 		} else {
 			this.setState({
 				isOpen: false,
-				inputValue: '',
+				inputValue: this.props.selectResetsInput ? '' : value[this.props.labelKey],
 				isPseudoFocused: this.state.isFocused,
 			}, () => {
 				this.setValue(value);
@@ -946,6 +950,7 @@ const Select = React.createClass({
 	getFocusableOptionIndex (selectedOption) {
 		var options = this._visibleOptions;
 		if (!options.length) return null;
+    if (!this.props.focusFirstOption && !this.state.focusedOption) return null;
 
 		let focusedOption = this.state.focusedOption || selectedOption;
 		if (focusedOption && !focusedOption.disabled) {
@@ -954,7 +959,7 @@ const Select = React.createClass({
 				return focusedOptionIndex;
 			}
 		}
-
+    if (!this.props.focusFirstOption) return null;
 		for (var i = 0; i < options.length; i++) {
 			if (!options[i].disabled) return i;
 		}
