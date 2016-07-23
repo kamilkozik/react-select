@@ -406,6 +406,7 @@ var Select = _react2['default'].createClass({
 		escapeClearsValue: _react2['default'].PropTypes.bool, // whether escape clears the value when the menu is closed
 		filterOption: _react2['default'].PropTypes.func, // method to filter a single option (option, filterString)
 		filterOptions: _react2['default'].PropTypes.any, // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
+		focusFirstOption: _react2['default'].PropTypes.bool, // if first option should be focused after menu open
 		ignoreAccents: _react2['default'].PropTypes.bool, // whether to strip diacritics when filtering
 		ignoreCase: _react2['default'].PropTypes.bool, // whether to perform case-insensitive filtering
 		inputProps: _react2['default'].PropTypes.object, // custom attributes for the Input
@@ -444,6 +445,7 @@ var Select = _react2['default'].createClass({
 		resetValue: _react2['default'].PropTypes.any, // value to use when you clear the control
 		scrollMenuIntoView: _react2['default'].PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
 		searchable: _react2['default'].PropTypes.bool, // whether to enable searching feature or not
+		selectResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared after selection is made
 		simpleValue: _react2['default'].PropTypes.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
 		style: _react2['default'].PropTypes.object, // optional style to apply to the control
 		tabIndex: _react2['default'].PropTypes.string, // optional tab index of the control
@@ -471,6 +473,7 @@ var Select = _react2['default'].createClass({
 			disabled: false,
 			escapeClearsValue: true,
 			filterOptions: true,
+			focusFirstOption: true,
 			ignoreAccents: true,
 			ignoreCase: true,
 			inputProps: {},
@@ -491,6 +494,7 @@ var Select = _react2['default'].createClass({
 			resetValue: null,
 			scrollMenuIntoView: true,
 			searchable: true,
+			selectResetsInput: true,
 			simpleValue: false,
 			tabSelectsValue: true,
 			valueComponent: _Value2['default'],
@@ -922,7 +926,7 @@ var Select = _react2['default'].createClass({
 		this.hasScrolledToOption = false;
 		if (this.props.multi) {
 			this.setState({
-				inputValue: '',
+				inputValue: this.props.selectResetsInput ? '' : this.state.inputValue.slice(),
 				focusedIndex: null
 			}, function () {
 				_this3.addValue(value);
@@ -930,7 +934,7 @@ var Select = _react2['default'].createClass({
 		} else {
 			this.setState({
 				isOpen: false,
-				inputValue: '',
+				inputValue: this.props.selectResetsInput ? '' : value[this.props.labelKey],
 				isPseudoFocused: this.state.isFocused
 			}, function () {
 				_this3.setValue(value);
@@ -1342,6 +1346,7 @@ var Select = _react2['default'].createClass({
 	getFocusableOptionIndex: function getFocusableOptionIndex(selectedOption) {
 		var options = this._visibleOptions;
 		if (!options.length) return null;
+		if (!this.props.focusFirstOption && !this.state.focusedOption) return null;
 
 		var focusedOption = this.state.focusedOption || selectedOption;
 		if (focusedOption && !focusedOption.disabled) {
@@ -1350,7 +1355,7 @@ var Select = _react2['default'].createClass({
 				return focusedOptionIndex;
 			}
 		}
-
+		if (!this.props.focusFirstOption) return null;
 		for (var i = 0; i < options.length; i++) {
 			if (!options[i].disabled) return i;
 		}
