@@ -71,6 +71,7 @@ const Select = React.createClass({
 		onBlurResetsInput: React.PropTypes.bool,    // whether input is cleared on blur
 		onChange: React.PropTypes.func,             // onChange handler: function (newValue) {}
 		onClose: React.PropTypes.func,              // fires when the menu is closed
+		onEnterPress: React.PropTypes.func,         // onEnterPress handler: function (event)
 		onFocus: React.PropTypes.func,              // onFocus handler: function (event) {}
 		onInputChange: React.PropTypes.func,        // onInputChange handler: function (inputValue) {}
 		onMenuScrollToBottom: React.PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
@@ -681,12 +682,15 @@ const Select = React.createClass({
 		});
 	},
 
-	selectFocusedOption () {
+	selectFocusedOption (event=null) {
 		// if (this.props.allowCreate && !this.state.focusedOption) {
 		// 	return this.selectValue(this.state.inputValue);
 		// }
 		if (this._focusedOption) {
 			return this.selectValue(this._focusedOption);
+		}
+		if (this.props.onEnterPress && event !== null) {
+			return this.props.onEnterPress(event);
 		}
 	},
 
